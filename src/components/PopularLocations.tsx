@@ -3,7 +3,7 @@ import { MapPin, Clock, Building } from "lucide-react";
 const popularLocations = [
   {
     id: "1",
-    name: "Central Library",
+    name: "Library",
     category: "Library",
     description: "Main campus library with extensive study areas, computer labs, and resource centers.",
     hours: "Mon-Fri: 7AM-11PM",
@@ -12,7 +12,7 @@ const popularLocations = [
   },
   {
     id: "2",
-    name: "Student Union",
+    name: "Student Life Center",
     category: "Student Life",
     description: "Hub for student activities, events, club meetings, and social gatherings.",
     hours: "Mon-Sun: 8AM-10PM",
@@ -21,7 +21,7 @@ const popularLocations = [
   },
   {
     id: "3",
-    name: "Main Cafeteria",
+    name: "Tapal Cafeteria",
     category: "Dining",
     description: "Largest dining facility offering diverse meal options and dining plans.",
     hours: "Daily: 7AM-9PM",
@@ -39,7 +39,7 @@ const popularLocations = [
   },
   {
     id: "5",
-    name: "Recreation Center",
+    name: "Amphitheater",
     category: "Recreation",
     description: "State-of-the-art fitness center with pool, courts, and wellness programs.",
     hours: "Mon-Fri: 6AM-11PM",

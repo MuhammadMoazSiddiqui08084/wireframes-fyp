@@ -37,11 +37,11 @@ export function Hero() {
           {/* Quick Stats Wireframe */}
           <div className="grid grid-cols-3 gap-3">
             <div className="border-2 border-gray-400 p-3 bg-white">
-              <div className="text-gray-900 mb-1">50+</div>
+              <div className="text-gray-900 mb-1">2+</div>
               <div className="text-xs text-gray-600">Buildings</div>
             </div>
             <div className="border-2 border-gray-400 p-3 bg-white">
-              <div className="text-gray-900 mb-1">15</div>
+              <div className="text-gray-900 mb-1">2</div>
               <div className="text-xs text-gray-600">Departments</div>
             </div>
             <div className="border-2 border-gray-400 p-3 bg-white">
