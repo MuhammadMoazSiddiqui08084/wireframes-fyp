@@ -9,7 +9,7 @@ export function Footer() {
           <div>
             <div className="flex items-center gap-2 mb-2">
               <div className="w-5 h-5 border-2 border-gray-600"></div>
-              <span className="text-gray-900 text-sm">Campus Navigator</span>
+              <span className="text-gray-900 text-sm">Campus Eye</span>
             </div>
             <p className="text-xs text-gray-700">
               Making campus navigation easy and intuitive for students and visitors.
@@ -69,7 +69,7 @@ export function Footer() {
         </div>
 
         <div className="pt-4 border-t-2 border-gray-400 text-center">
-          <p className="text-xs text-gray-600">&copy; 2025 Campus Navigator. All rights reserved.</p>
+          <p className="text-xs text-gray-600">&copy; 2025 Campus Eye. All rights reserved.</p>
         </div>
       </div>
     </footer>

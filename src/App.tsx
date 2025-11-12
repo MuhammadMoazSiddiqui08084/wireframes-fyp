@@ -53,9 +53,9 @@ export default function App() {
           <Hero />
           <InteractiveMap />
           <SearchBar />
-          <CategoryGrid />
+          {/* <CategoryGrid /> */}
           <PopularLocations />
-          <Features />
+          {/* <Features /> */}
           <QuickActions />
           <Footer />
         </div>
