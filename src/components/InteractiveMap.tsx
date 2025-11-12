@@ -1,6 +1,6 @@
-import { Navigation2, X, ZoomIn, ZoomOut, Maximize2, ChevronDown } from "lucide-react";
-import { useState } from "react";
-import { Search } from "lucide-react";
+import { Navigation2, X, ZoomIn, ZoomOut, Maximize2, Camera } from "lucide-react";
+import { useState, useRef } from "react";
+
 interface MapLocation {
   id: string;
   name: string;
@@ -25,7 +25,89 @@ export function InteractiveMap() {
   const [selectedLocation, setSelectedLocation] = useState<MapLocation | null>(null);
   const [fromLocation, setFromLocation] = useState<string>("");
   const [toLocation, setToLocation] = useState<string>("");
+  const [fromInput, setFromInput] = useState<string>("");
+  const [toInput, setToInput] = useState<string>("");
+  const [showFromSuggestions, setShowFromSuggestions] = useState(false);
+  const [showToSuggestions, setShowToSuggestions] = useState(false);
   const [showRoute, setShowRoute] = useState(false);
+  const [fromImage, setFromImage] = useState<string | null>(null);
+  const [toImage, setToImage] = useState<string | null>(null);
+  const fromImageInputRef = useRef<HTMLInputElement>(null);
+  const toImageInputRef = useRef<HTMLInputElement>(null);
+
+  const handleFromImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setFromImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleToImageSelect = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        setToImage(reader.result as string);
+      };
+      reader.readAsDataURL(file);
+    }
+  };
+
+  const handleRemoveFromImage = () => {
+    setFromImage(null);
+    if (fromImageInputRef.current) {
+      fromImageInputRef.current.value = "";
+    }
+  };
+
+  const handleRemoveToImage = () => {
+    setToImage(null);
+    if (toImageInputRef.current) {
+      toImageInputRef.current.value = "";
+    }
+  };
+
+  const handleFromInputChange = (value: string) => {
+    setFromInput(value);
+    setShowFromSuggestions(true);
+    // Clear the selected location if user is typing
+    if (value === "") {
+      setFromLocation("");
+    }
+  };
+
+  const handleToInputChange = (value: string) => {
+    setToInput(value);
+    setShowToSuggestions(true);
+    // Clear the selected location if user is typing
+    if (value === "") {
+      setToLocation("");
+    }
+  };
+
+  const handleFromLocationSelect = (location: MapLocation) => {
+    setFromLocation(location.id);
+    setFromInput(location.name);
+    setShowFromSuggestions(false);
+  };
+
+  const handleToLocationSelect = (location: MapLocation) => {
+    setToLocation(location.id);
+    setToInput(location.name);
+    setShowToSuggestions(false);
+  };
+
+  const filteredFromLocations = mapLocations.filter(loc =>
+    loc.name.toLowerCase().includes(fromInput.toLowerCase())
+  );
+
+  const filteredToLocations = mapLocations.filter(loc =>
+    loc.name.toLowerCase().includes(toInput.toLowerCase())
+  );
 
   const handleGetDirections = () => {
     if (fromLocation && toLocation) {
@@ -36,11 +118,17 @@ export function InteractiveMap() {
   const handleClearRoute = () => {
     setFromLocation("");
     setToLocation("");
+    setFromInput("");
+    setToInput("");
     setShowRoute(false);
+    setFromImage(null);
+    setToImage(null);
+    if (fromImageInputRef.current) fromImageInputRef.current.value = "";
+    if (toImageInputRef.current) toImageInputRef.current.value = "";
   };
 
-  const fromLocationData = mapLocations.find((loc) => loc.id === fromLocation);
-  const toLocationData = mapLocations.find((loc) => loc.id === toLocation);
+  const fromLocationData = mapLocations.find(loc => loc.id === fromLocation);
+  const toLocationData = mapLocations.find(loc => loc.id === toLocation);
 
   return (
     <section className="py-8 px-3 bg-gray-50">
@@ -52,63 +140,141 @@ export function InteractiveMap() {
           </p>
         </div>
 
-        {/* Location Input Form */}
-        <div className="border-2 border-gray-400 p-5 mb-6 bg-white rounded-xl shadow-sm">
+        {/* Location Input Form Wireframe */}
+        <div className="border-2 border-gray-400 p-4 mb-4 bg-white">
           <div className="flex flex-col gap-3">
             <div className="space-y-1.5">
-              <label className="text-xs text-gray-700 font-medium">
-                From (Current Location)
-              </label>
-              <div className="relative">
-                <select
-                  value={fromLocation}
-                  onChange={(e) => setFromLocation(e.target.value)}
-                  className="w-full h-10 border-2 border-gray-400 px-3 text-xs appearance-none bg-white text-gray-700 rounded focus:outline-none focus:border-gray-600"
+              <label className="text-xs text-gray-700">From (Current Location)</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={fromInput}
+                    onChange={(e) => handleFromInputChange(e.target.value)}
+                    onFocus={() => setShowFromSuggestions(true)}
+                    placeholder="Type or select starting point..."
+                    className="w-full h-10 border-2 border-gray-400 px-3 text-xs bg-white text-gray-700"
+                  />
+                  {showFromSuggestions && fromInput && filteredFromLocations.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 border-2 border-gray-400 bg-white max-h-40 overflow-y-auto">
+                      {filteredFromLocations.map((loc) => (
+                        <button
+                          key={loc.id}
+                          onClick={() => handleFromLocationSelect(loc)}
+                          className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 border-b border-gray-300 last:border-b-0"
+                        >
+                          {loc.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={fromImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleFromImageSelect}
+                  className="hidden"
+                  id="from-image-input"
+                />
+                <label
+                  htmlFor="from-image-input"
+                  className="cursor-pointer w-10 h-10 border-2 border-gray-400 bg-gray-100 flex items-center justify-center hover:border-gray-600 transition-colors"
                 >
-                  <option value="">Select starting point...</option>
-                  {mapLocations.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                  <Camera className="w-4 h-4 text-gray-600" />
+                </label>
               </div>
+              {fromImage && (
+                <div className="border-2 border-gray-400 p-2 bg-gray-50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 border-2 border-gray-400 bg-white overflow-hidden flex-shrink-0">
+                      <img src={fromImage} alt="From location" className="w-full h-full object-cover grayscale" />
+                    </div>
+                    <span className="text-xs text-gray-700 flex-1">Photo captured</span>
+                    <button
+                      onClick={handleRemoveFromImage}
+                      className="w-6 h-6 border-2 border-gray-400 bg-white flex items-center justify-center hover:border-gray-600 transition-colors"
+                    >
+                      <X className="w-3 h-3 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="space-y-1.5">
-              <label className="text-xs text-gray-700 font-medium">
-                To (Destination)
-              </label>
-              <div className="relative">
-                <select
-                  value={toLocation}
-                  onChange={(e) => setToLocation(e.target.value)}
-                  className="w-full h-10 border-2 border-gray-400 px-3 text-xs appearance-none bg-white text-gray-700 rounded focus:outline-none focus:border-gray-600"
+              <label className="text-xs text-gray-700">To (Destination)</label>
+              <div className="flex gap-2">
+                <div className="relative flex-1">
+                  <input
+                    type="text"
+                    value={toInput}
+                    onChange={(e) => handleToInputChange(e.target.value)}
+                    onFocus={() => setShowToSuggestions(true)}
+                    placeholder="Type or select destination..."
+                    className="w-full h-10 border-2 border-gray-400 px-3 text-xs bg-white text-gray-700"
+                  />
+                  {showToSuggestions && toInput && filteredToLocations.length > 0 && (
+                    <div className="absolute z-50 w-full mt-1 border-2 border-gray-400 bg-white max-h-40 overflow-y-auto">
+                      {filteredToLocations.map((loc) => (
+                        <button
+                          key={loc.id}
+                          onClick={() => handleToLocationSelect(loc)}
+                          className="w-full text-left px-3 py-2 text-xs text-gray-700 hover:bg-gray-100 border-b border-gray-300 last:border-b-0"
+                        >
+                          {loc.name}
+                        </button>
+                      ))}
+                    </div>
+                  )}
+                </div>
+                <input
+                  ref={toImageInputRef}
+                  type="file"
+                  accept="image/*"
+                  capture="environment"
+                  onChange={handleToImageSelect}
+                  className="hidden"
+                  id="to-image-input"
+                />
+                <label
+                  htmlFor="to-image-input"
+                  className="cursor-pointer w-10 h-10 border-2 border-gray-400 bg-gray-100 flex items-center justify-center hover:border-gray-600 transition-colors"
                 >
-                  <option value="">Select destination...</option>
-                  {mapLocations.map((loc) => (
-                    <option key={loc.id} value={loc.id}>
-                      {loc.name}
-                    </option>
-                  ))}
-                </select>
-                <ChevronDown className="absolute right-3 top-1/2 -translate-y-1/2 w-3.5 h-3.5 text-gray-400 pointer-events-none" />
+                  <Camera className="w-4 h-4 text-gray-600" />
+                </label>
               </div>
+              {toImage && (
+                <div className="border-2 border-gray-400 p-2 bg-gray-50">
+                  <div className="flex items-center gap-2">
+                    <div className="w-10 h-10 border-2 border-gray-400 bg-white overflow-hidden flex-shrink-0">
+                      <img src={toImage} alt="To location" className="w-full h-full object-cover grayscale" />
+                    </div>
+                    <span className="text-xs text-gray-700 flex-1">Photo captured</span>
+                    <button
+                      onClick={handleRemoveToImage}
+                      className="w-6 h-6 border-2 border-gray-400 bg-white flex items-center justify-center hover:border-gray-600 transition-colors"
+                    >
+                      <X className="w-3 h-3 text-gray-600" />
+                    </button>
+                  </div>
+                </div>
+              )}
             </div>
 
             <div className="flex gap-2">
-              <button
-                onClick={handleGetDirections}
-                className="flex-1 h-10 border-2 border-gray-400 flex items-center justify-center gap-2 rounded hover:border-gray-600 hover:bg-gray-50 transition-all"
+              <button 
+                onClick={handleGetDirections} 
+                className="flex-1 h-10 border-2 border-gray-400 flex items-center justify-center gap-2 hover:border-gray-600 transition-colors"
               >
                 <Navigation2 className="w-3.5 h-3.5 text-gray-600" />
                 <span className="text-gray-700 text-xs">Get Directions</span>
               </button>
               {showRoute && (
-                <button
-                  onClick={handleClearRoute}
-                  className="w-10 h-10 border-2 border-gray-400 flex items-center justify-center rounded hover:border-gray-600 hover:bg-gray-50 transition-all"
+                <button 
+                  onClick={handleClearRoute} 
+                  className="w-10 h-10 border-2 border-gray-400 flex items-center justify-center hover:border-gray-600 transition-colors"
                 >
                   <X className="w-3.5 h-3.5 text-gray-600" />
                 </button>
@@ -117,47 +283,43 @@ export function InteractiveMap() {
           </div>
 
           {showRoute && fromLocationData && toLocationData && (
-            <div className="mt-4 p-3 border-2 border-gray-400 bg-gray-50 rounded">
+            <div className="mt-3 p-3 border-2 border-gray-400 bg-gray-50">
               <div className="flex items-center gap-2 mb-1.5">
                 <Navigation2 className="w-4 h-4 text-gray-600" />
-                <span className="text-gray-900 text-sm font-medium">Route Information</span>
+                <span className="text-gray-900 text-sm">Route Information</span>
               </div>
               <p className="text-xs text-gray-700">
-                Showing route from <strong>{fromLocationData.name}</strong> to{" "}
-                <strong>{toLocationData.name}</strong>
+                Showing route from <strong>{fromLocationData.name}</strong> to <strong>{toLocationData.name}</strong>
               </p>
               <p className="text-xs text-gray-600 mt-1">
-                Estimated walking time: 5–8 minutes
+                Estimated walking time: 5-8 minutes
               </p>
             </div>
           )}
         </div>
 
-        {/* Map Section */}
-        <div className="relative bg-white border-2 border-gray-400 rounded-xl shadow-sm overflow-hidden mb-10">
+        {/* Map Wireframe */}
+        <div className="relative bg-white border-2 border-gray-400">
           {/* Map Controls */}
           <div className="absolute top-2 right-2 flex flex-col gap-1.5 z-10">
-            {[ZoomIn, ZoomOut, Maximize2].map((Icon, i) => (
-              <button
-                key={i}
-                className="w-8 h-8 border-2 border-gray-400 bg-white flex items-center justify-center rounded hover:border-gray-600 hover:bg-gray-50 transition-all"
-              >
-                <Icon className="w-4 h-4 text-gray-600" />
-              </button>
-            ))}
+            <button className="w-8 h-8 border-2 border-gray-400 bg-white flex items-center justify-center hover:border-gray-600 transition-colors">
+              <ZoomIn className="w-4 h-4 text-gray-600" />
+            </button>
+            <button className="w-8 h-8 border-2 border-gray-400 bg-white flex items-center justify-center hover:border-gray-600 transition-colors">
+              <ZoomOut className="w-4 h-4 text-gray-600" />
+            </button>
+            <button className="w-8 h-8 border-2 border-gray-400 bg-white flex items-center justify-center hover:border-gray-600 transition-colors">
+              <Maximize2 className="w-4 h-4 text-gray-600" />
+            </button>
           </div>
 
           {/* Map Area */}
           <div className="relative aspect-[4/3] bg-gray-50">
-            {/* Grid */}
-            <div
-              className="absolute inset-0"
-              style={{
-                backgroundImage:
-                  "linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)",
-                backgroundSize: "20px 20px",
-              }}
-            ></div>
+            {/* Grid pattern */}
+            <div className="absolute inset-0" style={{
+              backgroundImage: 'linear-gradient(#e5e7eb 1px, transparent 1px), linear-gradient(90deg, #e5e7eb 1px, transparent 1px)',
+              backgroundSize: '20px 20px'
+            }}></div>
 
             {/* Decorative paths */}
             <svg className="absolute inset-0 w-full h-full opacity-50">
@@ -205,15 +367,13 @@ export function InteractiveMap() {
                   style={{ left: `${location.x}%`, top: `${location.y}%` }}
                 >
                   <div className="relative">
-                    <div
-                      className={`w-4 h-4 border-2 rounded-full transition-all ${
-                        isStartPoint || isEndPoint
-                          ? "border-gray-700 bg-gray-500"
-                          : selectedLocation?.id === location.id
-                          ? "border-gray-600 bg-gray-300"
-                          : "border-gray-500 bg-white"
-                      }`}
-                    ></div>
+                    <div className={`w-4 h-4 border-2 rounded-full ${
+                      isStartPoint || isEndPoint
+                        ? "border-gray-700 bg-gray-500"
+                        : selectedLocation?.id === location.id
+                        ? "border-gray-600 bg-gray-300"
+                        : "border-gray-500 bg-white"
+                    } transition-all`}></div>
                     <div className="absolute top-full mt-1 bg-gray-800 text-white px-2 py-0.5 text-xs whitespace-nowrap opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none rounded">
                       {location.name}
                     </div>
@@ -222,93 +382,38 @@ export function InteractiveMap() {
               );
             })}
 
-            {/* Buildings + Trees */}
-            <div className="absolute bottom-6 left-[20%] w-10 h-12 border-2 border-gray-400 bg-gray-200 flex items-end justify-center pb-0.5 rounded">
+            {/* Decorative Buildings */}
+            <div className="absolute bottom-6 left-[20%] w-10 h-12 border-2 border-gray-400 bg-gray-200 flex items-end justify-center pb-0.5">
               <span className="text-xs text-gray-500">BLDG</span>
             </div>
-            <div className="absolute bottom-6 left-[45%] w-12 h-14 border-2 border-gray-400 bg-gray-200 flex items-end justify-center pb-0.5 rounded">
+            <div className="absolute bottom-6 left-[45%] w-12 h-14 border-2 border-gray-400 bg-gray-200 flex items-end justify-center pb-0.5">
               <span className="text-xs text-gray-500">BLDG</span>
             </div>
-            <div className="absolute bottom-6 right-[20%] w-14 h-16 border-2 border-gray-400 bg-gray-200 flex items-end justify-center pb-0.5 rounded">
+            <div className="absolute bottom-6 right-[20%] w-14 h-16 border-2 border-gray-400 bg-gray-200 flex items-end justify-center pb-0.5">
               <span className="text-xs text-gray-500">BLDG</span>
             </div>
-
+            
             {/* Trees */}
-            {[
-              { top: "20%", left: "15%" },
-              { top: "30%", left: "18%" },
-              { top: "60%", right: "20%" },
-              { top: "65%", right: "17%" },
-            ].map((pos, i) => (
-              <div
-                key={i}
-                className="absolute w-3 h-3 border-2 border-gray-400 rounded-full bg-gray-300"
-                style={pos}
-              ></div>
-            ))}
+            <div className="absolute top-[20%] left-[15%] w-3 h-3 border-2 border-gray-400 rounded-full bg-gray-300"></div>
+            <div className="absolute top-[30%] left-[18%] w-3 h-3 border-2 border-gray-400 rounded-full bg-gray-300"></div>
+            <div className="absolute top-[60%] right-[20%] w-3 h-3 border-2 border-gray-400 rounded-full bg-gray-300"></div>
+            <div className="absolute top-[65%] right-[17%] w-3 h-3 border-2 border-gray-400 rounded-full bg-gray-300"></div>
           </div>
 
           {/* Selected Location Info */}
           {selectedLocation && (
-            <div className="p-3 border-t-2 border-gray-400 bg-gray-50 rounded-b-xl">
+            <div className="p-3 border-t-2 border-gray-400 bg-gray-50">
               <div className="flex items-center justify-between gap-2">
                 <div className="flex-1 min-w-0">
-                  <h3 className="text-gray-900 mb-0.5 text-sm font-medium">
-                    {selectedLocation.name}
-                  </h3>
-                  <p className="text-xs text-gray-600">
-                    Click "Get Directions" to navigate here
-                  </p>
+                  <h3 className="text-gray-900 mb-0.5 text-sm">{selectedLocation.name}</h3>
+                  <p className="text-xs text-gray-600">Click "Get Directions" to navigate here</p>
                 </div>
-                <button className="h-8 px-3 border-2 border-gray-400 flex items-center justify-center rounded hover:border-gray-600 hover:bg-gray-50 transition-all">
+                <button className="h-8 px-3 border-2 border-gray-400 flex items-center justify-center hover:border-gray-600 transition-colors flex-shrink-0">
                   <span className="text-xs text-gray-700">View</span>
                 </button>
               </div>
             </div>
           )}
-        </div>
-
-        {/* ⬇️ Added gap & visual separation before search content */}
-        <div className="h-6"></div>
-
-        {/* Search & Stats Section */}
-        <div className="relative px-4">
-          <div className="w-full text-center">
-            {/* Search Bar */}
-            <div className="relative mb-6">
-              <div className="flex flex-col gap-2">
-                <div className="h-11 border-2 border-gray-400 bg-white flex items-center px-3 rounded shadow-sm">
-                  <Search className="w-4 h-4 text-gray-400 mr-2" />
-                  <span className="text-gray-400 text-xs truncate">
-                    Search for buildings...
-                  </span>
-                </div>
-                <div className="h-10 border-2 border-gray-400 bg-gray-300 flex items-center justify-center rounded hover:bg-gray-200 transition">
-                  <span className="text-gray-700 text-sm font-medium">
-                    Search
-                  </span>
-                </div>
-              </div>
-            </div>
-
-            {/* Quick Stats */}
-            <div className="grid grid-cols-3 gap-3">
-              <div className="border-2 border-gray-400 p-3 bg-white rounded shadow-sm">
-                <div className="text-gray-900 mb-1 text-sm font-medium">2+</div>
-                <div className="text-xs text-gray-600">Buildings</div>
-              </div>
-              <div className="border-2 border-gray-400 p-3 bg-white rounded shadow-sm">
-                <div className="text-gray-900 mb-1 text-sm font-medium">2</div>
-                <div className="text-xs text-gray-600">Departments</div>
-              </div>
-              <div className="border-2 border-gray-400 p-3 bg-white rounded shadow-sm">
-                <div className="text-gray-900 mb-1 text-sm font-medium">
-                  100+
-                </div>
-                <div className="text-xs text-gray-600">Locations</div>
-              </div>
-            </div>
-          </div>
         </div>
       </div>
     </section>

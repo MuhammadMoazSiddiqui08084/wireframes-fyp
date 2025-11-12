@@ -1,5 +1,6 @@
 import { useState, useEffect } from "react";
 import { Header } from "./components/Header";
+import { SearchBar } from "./components/SearchBar";
 import { Hero } from "./components/Hero";
 import { CategoryGrid } from "./components/CategoryGrid";
 import { PopularLocations } from "./components/PopularLocations";
@@ -8,13 +9,14 @@ import { Features } from "./components/Features";
 import { QuickActions } from "./components/QuickActions";
 import { Footer } from "./components/Footer";
 import { WelcomePage } from "./components/WelcomePage";
+import { EventsBanner } from "./components/EventsBanner";
 
 type UserType = "student" | "visitor" | null;
 
 export default function App() {
   const [userType, setUserType] = useState<UserType>(null);
 
-  //Check if user has already selected their type
+  // Check if user has already selected their type
   useEffect(() => {
     const savedUserType = localStorage.getItem("userType") as UserType;
     if (savedUserType) {
@@ -47,10 +49,12 @@ export default function App() {
       <div className="w-full max-w-[390px] h-[844px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
         <div className="w-full h-full bg-white rounded-[2.5rem] overflow-y-auto overflow-x-hidden">
           <Header />
+          <EventsBanner />
           <Hero />
           <InteractiveMap />
-          <PopularLocations />
+          <SearchBar />
           <CategoryGrid />
+          <PopularLocations />
           <Features />
           <QuickActions />
           <Footer />
