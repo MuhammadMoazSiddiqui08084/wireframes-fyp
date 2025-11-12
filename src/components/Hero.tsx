@@ -13,7 +13,7 @@ export function Hero() {
       <div className="relative z-10 flex flex-col items-center justify-center text-center max-w-md mx-auto">
         <div className="flex items-center justify-center gap-2 mb-4">
           <div className="w-6 h-6 border-2 border-gray-500"></div>
-          <span className="text-gray-700 text-sm">Campus Navigator</span>
+          <span className="text-gray-700 text-sm">Campus Eye</span>
         </div>
 
         <h1 className="text-gray-900 mb-3 text-xl">Find Your Way Around Campus</h1>

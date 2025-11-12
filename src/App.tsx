@@ -49,8 +49,8 @@ export default function App() {
           <Header />
           <Hero />
           <InteractiveMap />
-          <CategoryGrid />
           <PopularLocations />
+          <CategoryGrid />
           <Features />
           <QuickActions />
           <Footer />

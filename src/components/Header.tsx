@@ -16,7 +16,7 @@ export function Header() {
           {/* Logo Wireframe */}
           <div className="flex items-center gap-2">
             <div className="w-6 h-6 border-2 border-gray-400"></div>
-            <span className="text-gray-900 text-sm">Campus Navigator</span>
+            <span className="text-gray-900 text-sm">Campus Eye</span>
           </div>
 
           {/* Mobile Menu Button */}
