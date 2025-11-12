@@ -48,9 +48,9 @@ export default function App() {
         <div className="w-full h-full bg-white rounded-[2.5rem] overflow-y-auto overflow-x-hidden">
           <Header />
           <Hero />
+          <InteractiveMap />
           <CategoryGrid />
           <PopularLocations />
-          <InteractiveMap />
           <Features />
           <QuickActions />
           <Footer />
