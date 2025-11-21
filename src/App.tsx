@@ -49,8 +49,9 @@ export default function App() {
       <div className="w-full max-w-[390px] h-[844px] bg-gray-900 rounded-[3rem] p-3 shadow-2xl">
         <div className="w-full h-full bg-white rounded-[2.5rem] overflow-y-auto overflow-x-hidden">
           <Header />
+          
+          {/* <Hero /> */}
           <EventsBanner />
-          <Hero />
           <InteractiveMap />
           <SearchBar />
           {/* <CategoryGrid /> */}

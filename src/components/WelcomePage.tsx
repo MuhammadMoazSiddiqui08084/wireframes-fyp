@@ -12,7 +12,7 @@ export function WelcomePage({ onSelectUserType }: WelcomePageProps) {
         <div className="text-center mb-8">
           <div className="flex items-center justify-center gap-2 mb-4">
             <div className="w-8 h-8 border-2 border-gray-400"></div>
-            <h1 className="text-gray-900 text-lg">Campus Navigator</h1>
+            <h1 className="text-gray-900 text-lg">Campus Eye</h1>
           </div>
           <p className="text-gray-700 text-sm px-4">Welcome! Let us customize your navigation experience</p>
         </div>
